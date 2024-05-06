@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 12 Game</title>
+    <style>
+        /* CSS styles */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background-color: #c418c7;
+            display: block;
+            margin: auto;
+        }
+        .title {
+            text-align: center;
+            font-size: 42px;
+            margin-top: 20px;
+            color: #e54d07;
+        }
+        .score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #ff7700;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">Awesome Coding Game</h1>
+    <h2 class = "title">collect the green boxes </h2>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div class="score">Score: <span id="score">0</span></div>
+    <script>
+        // JavaScript code
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Load JSON data
+        const objectsJSON = [
+            { "id": 1, "x": 100, "y": 100, "width": 50, "height": 50 },
+            { "id": 2, "x": 200, "y": 200, "width": 50, "height": 50 },
+            { "id": 3, "x": 300, "y": 300, "width": 50, "height": 50 },
+            { "id": 4, "x": 400, "y": 400, "width": 50, "height": 50 },
+            { "id": 5, "x": 500, "y": 500, "width": 50, "height": 50 }
+        ];
+
+        const collectiblesJSON = [
+            { "id": 1, "x": 50, "y": 50, "width": 20, "height": 20 },
+            { "id": 2, "x": 150, "y": 150, "width": 20, "height": 20 },
+            { "id": 3, "x": 250, "y": 250, "width": 20, "height": 20 }
+        ];
+
+        // Player object
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            width: 20,
+            height: 20,
+            speed: 10,
+            score: 0
+        };
+
+        // Function to draw player
+        function drawPlayer() {
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        // Function to draw objects
+        function drawObjects() {
+            objectsJSON.forEach(obj => {
+                ctx.fillStyle = 'red';
+                ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+            });
+        }
+
+        // Function to draw collectibles
+        function drawCollectibles() {
+            collectiblesJSON.forEach(collectible => {
+                ctx.fillStyle = 'green';
+                ctx.fillRect(collectible.x, collectible.y, collectible.width, collectible.height);
+            });
+        }
+
+        // Function to detect collision between two rectangles
+        function detectCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.width &&
+                rect1.x + rect1.width > rect2.x &&
+                rect1.y < rect2.y + rect2.height &&
+                rect1.y + rect1.height > rect2.y;
+        }
+
+        // Function to handle player movement
+        function movePlayer(event) {
+            switch (event.keyCode) {
+                case 37: // Left arrow
+                    player.x -= player.speed;
+                    break;
+                case 38: // Up arrow
+                    player.y -= player.speed;
+                    break;
+                case 39: // Right arrow
+                    player.x += player.speed;
+                    break;
+                case 40: // Down arrow
+                    player.y += player.speed;
+                    break;
+            }
+        }
+
+        // Function to update game state
+        function update() {
+            // Check for collision with objects
+            objectsJSON.forEach(obj => {
+                if (detectCollision(player, obj)) {
+                    // Reset player position if collision occurs
+                    player.x = canvas.width / 2;
+                    player.y = canvas.height / 2;
+                }
+            });
+
+            // Check for collision with collectibles
+            collectiblesJSON.forEach((collectible, index) => {
+                if (detectCollision(player, collectible)) {
+                    // Remove collected collectible from array and increase score
+                    collectiblesJSON.splice(index, 1);
+                    player.score++;
+                    document.getElementById('score').textContent = player.score;
+                }
+            });
+        }
+
+        // Function to render game
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawObjects();
+            drawCollectibles();
+        }
+
+        // Game loop
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listener for keyboard input
+        window.addEventListener('keydown', movePlayer);
+
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>
